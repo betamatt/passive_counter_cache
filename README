@@ -1,0 +1,30 @@
+PassiveCounterCache
+===================
+
+Adds support for simple counter cache updating that can be hooked into background processing.  Rails counter caching is disabled
+and a method is provided to update caches from a background process.
+
+
+Example
+=======
+
+class Cart < ActiveRecord::Base
+  has_many :wheels
+end
+
+class Wheel < ActiveRecord::Base
+  belongs_to :cart, :passive_counter_cache => true
+end
+
+Create a cart and four wheels
+>> c = Cart.create
+>> 4.times do { c.wheels.create }
+
+As part of a BackgroundRb (or similar) scheduled task execute:
+>> PassiveCounterCache.update_all_caches!
+
+>> c.reload!
+>> c.wheel_count
+=> 4
+
+Copyright (c) 2009 Matt Griffin, released under the MIT license
